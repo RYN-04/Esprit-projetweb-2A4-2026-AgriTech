@@ -1,6 +1,10 @@
 <?php
 // $currentPage doit etre defini dans la page appelante
 $currentPage = $currentPage ?? '';
+<<<<<<< HEAD
+=======
+$base = $base ?? ''; // '' pour admin/, '../' pour admin/admin_users/
+>>>>>>> d5b9f36 (Initial commit)
 
 function sideActive($page, $currentPage) {
     return $page === $currentPage ? 'active' : '';
@@ -16,11 +20,20 @@ $sideModules = [
     'forum'    => ['Forum agricole',                              '../forum/forum.php',            '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 11h7M8.5 14h4"/>'],
     'plantes'  => ['Gestion des plantes et des traitements',      '../plantes/plantes.php',        '<path d="M12 22V10M12 10C12 6 9 3 4 3c0 5 3 7 8 7ZM12 14c0-4 3-7 8-7 0 5-3 7-8 7Z"/>'],
 ];
+<<<<<<< HEAD
 $sideUsers = ['users', 'Utilisateurs', '../users/users.php', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.4 3.5 6"/>'];
 
 function sideLink($key, $label, $href, $icon, $currentPage) {
     $exists = $href === '#' || file_exists(__DIR__ . '/../' . $href);
     $url = $exists ? $href : '#';
+=======
+$sideUsers = ['users', 'Utilisateurs', 'admin_users/users.php', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.4 3.5 6"/>'];
+
+function sideLink($key, $label, $href, $icon, $currentPage) {
+    global $base;
+    $exists = $href === '#' || file_exists(__DIR__ . '/../' . $href);
+    $url = ($exists && $href !== '#') ? $base . $href : '#';
+>>>>>>> d5b9f36 (Initial commit)
     $cls = sideActive($key, $currentPage);
     $title = $exists ? '' : ' title="Bientôt disponible"';
     $cur = $key === $currentPage ? ' aria-current="page"' : '';
@@ -29,8 +42,13 @@ function sideLink($key, $label, $href, $icon, $currentPage) {
 }
 ?>
 <aside class="sidebar">
+<<<<<<< HEAD
   <a class="side-brand" href="dashboard.php">
     <img class="side-logo" src="../assets/img/logo.png" alt="" width="40" height="40">
+=======
+  <a class="side-brand" href="<?= $base ?>dashboard.php">
+    <img class="side-logo" src="<?= $base ?>../assets/img/logo.png" alt="" width="40" height="40">
+>>>>>>> d5b9f36 (Initial commit)
     <span><strong>AgriTech</strong><small class="role">Espace administrateur</small></span>
   </a>
   <nav aria-label="Menu administrateur">

@@ -1,10 +1,9 @@
 <?php
-declare(strict_types=1);
+// PAGE : formulaire pour AJOUTER un utilisateur
 
 require_once __DIR__ . '/../../includes/session.php';
-require_once __DIR__ . '/../../../Controllers/UserController.php';
 
-// Protection : admin seulement
+// Seul l'admin a le droit d'etre ici
 if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../../login.php');
     exit;
@@ -14,62 +13,84 @@ $pageTitle = 'Ajouter un utilisateur - AgriTech';
 $currentPage = 'users';
 $base = '../';
 
-$userController = new UserController();
-$errors = [];
-$old = ['nom' => '', 'prenom' => '', 'email' => '', 'role' => 'agriculteur', 'statut' => 'actif'];
+$controller = new UserController();
 
+// Valeurs du formulaire (vides au depart)
+$nom = '';
+$prenom = '';
+$email = '';
+$role = 'agriculteur';
+$statut = 'actif';
+
+// Messages d'erreur (vides au depart)
+$erreur_nom = '';
+$erreur_prenom = '';
+$erreur_email = '';
+$erreur_password = '';
+
+// Quand on clique sur "Ajouter", le formulaire est envoye ici (methode POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 1. Lire les champs
-    foreach (['nom', 'prenom', 'email', 'role', 'statut'] as $champ) {
-        $old[$champ] = trim($_POST[$champ] ?? '');
-    }
-    $password = $_POST['password'] ?? '';
+    $nom = trim($_POST['nom']);
+    $prenom = trim($_POST['prenom']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $role = $_POST['role'];
+    $statut = $_POST['statut'];
 
-    // 2. Verifications cote serveur (memes regles que users.js)
-    foreach (['nom' => 'Le nom', 'prenom' => 'Le prénom'] as $champ => $label) {
-        $value = $old[$champ];
-        if ($value === '') {
-            $errors[$champ] = $label . ' est obligatoire.';
-        } elseif (mb_strlen($value) < 2 || mb_strlen($value) > 100) {
-            $errors[$champ] = $label . ' doit contenir entre 2 et 100 caractères.';
-        } elseif (!preg_match("/^[\p{L} '\-]+$/u", $value)) {
-            $errors[$champ] = $label . ' ne doit contenir que des lettres.';
-        }
-    }
+    $ok = true;   // devient false des qu'il y a une erreur
 
-    if ($old['email'] === '') {
-        $errors['email'] = "L'email est obligatoire.";
-    } elseif (!filter_var($old['email'], FILTER_VALIDATE_EMAIL) || mb_strlen($old['email']) > 190) {
-        $errors['email'] = 'Adresse email invalide.';
-    } elseif ($userController->emailExists($old['email'])) {
-        $errors['email'] = 'Cet email est déjà utilisé.';
+    if ($nom === '') {
+        $erreur_nom = 'Le nom est obligatoire.';
+        $ok = false;
+    } elseif (strlen($nom) < 2) {
+        $erreur_nom = 'Le nom doit contenir au moins 2 caractères.';
+        $ok = false;
     }
 
-    if ($password === '') {
-        $errors['password'] = 'Le mot de passe est obligatoire.';
-    } elseif (strlen($password) < 8) {
-        $errors['password'] = 'Le mot de passe doit contenir au moins 8 caractères.';
+    if ($prenom === '') {
+        $erreur_prenom = 'Le prénom est obligatoire.';
+        $ok = false;
+    } elseif (strlen($prenom) < 2) {
+        $erreur_prenom = 'Le prénom doit contenir au moins 2 caractères.';
+        $ok = false;
     }
 
-    if (!in_array($old['role'], ['admin', 'agriculteur'], true)) {
-        $errors['role'] = 'Rôle invalide.';
-    }
-    if (!in_array($old['statut'], ['actif', 'inactif'], true)) {
-        $errors['statut'] = 'Statut invalide.';
+    if ($email === '') {
+        $erreur_email = "L'email est obligatoire.";
+        $ok = false;
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $erreur_email = 'Email invalide.';
+        $ok = false;
+    } elseif ($controller->emailExists($email)) {
+        $erreur_email = 'Cet email est déjà utilisé.';
+        $ok = false;
     }
 
-    // 3. Pas d'erreur : on ajoute
-    if (empty($errors)) {
-        $user = new User(null, $old['nom'], $old['prenom'], $old['email'], $password, $old['role'], $old['statut']);
-        $userController->addUser($user);
+    if (strlen($password) < 8) {
+        $erreur_password = 'Le mot de passe doit contenir au moins 8 caractères.';
+        $ok = false;
+    }
+
+    // Securite : le role et le statut doivent etre des valeurs connues
+    if ($role !== 'admin' && $role !== 'agriculteur') {
+        $ok = false;
+    }
+    if ($statut !== 'actif' && $statut !== 'inactif') {
+        $ok = false;
+    }
+
+    // Aucune erreur : on enregistre dans la base puis on retourne a la liste
+    if ($ok) {
+        $user = new User(null, $nom, $prenom, $email, $password, $role, $statut);
+        $controller->addUser($user);
         header('Location: users.php?ok=ajoute');
         exit;
     }
 }
 
-function e(string $value): string
+function e($texte)
 {
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars($texte, ENT_QUOTES, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
@@ -97,36 +118,43 @@ function e(string $value): string
 
           <section class="form-card">
             <form method="post" action="add.php" novalidate onsubmit="return validerFormulaire()">
+
               <label>Nom
-                <input type="text" id="nom" name="nom" value="<?= e($old['nom']) ?>" class="<?= isset($errors['nom']) ? 'invalid' : '' ?>">
-                <span class="field-error" id="erreur-nom"><?= e($errors['nom'] ?? '') ?></span>
+                <input type="text" id="nom" name="nom" value="<?= e($nom) ?>">
+                <span class="field-error" id="erreur-nom"><?= e($erreur_nom) ?></span>
               </label>
+
               <label>Prénom
-                <input type="text" id="prenom" name="prenom" value="<?= e($old['prenom']) ?>" class="<?= isset($errors['prenom']) ? 'invalid' : '' ?>">
-                <span class="field-error" id="erreur-prenom"><?= e($errors['prenom'] ?? '') ?></span>
+                <input type="text" id="prenom" name="prenom" value="<?= e($prenom) ?>">
+                <span class="field-error" id="erreur-prenom"><?= e($erreur_prenom) ?></span>
               </label>
+
               <label>Email
-                <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" class="<?= isset($errors['email']) ? 'invalid' : '' ?>">
-                <span class="field-error" id="erreur-email"><?= e($errors['email'] ?? '') ?></span>
+                <input type="email" id="email" name="email" value="<?= e($email) ?>">
+                <span class="field-error" id="erreur-email"><?= e($erreur_email) ?></span>
               </label>
+
               <label>Mot de passe
-                <input type="password" id="password" name="password" class="<?= isset($errors['password']) ? 'invalid' : '' ?>">
-                <span class="field-error" id="erreur-password"><?= e($errors['password'] ?? '') ?></span>
+                <input type="password" id="password" name="password">
+                <span class="field-error" id="erreur-password"><?= e($erreur_password) ?></span>
               </label>
+
               <label>Rôle
-                <select id="role" name="role" class="<?= isset($errors['role']) ? 'invalid' : '' ?>">
-                  <option value="agriculteur" <?= $old['role'] === 'agriculteur' ? 'selected' : '' ?>>Agriculteur</option>
-                  <option value="admin" <?= $old['role'] === 'admin' ? 'selected' : '' ?>>Administrateur</option>
+                <select id="role" name="role">
+                  <option value="agriculteur" <?= $role === 'agriculteur' ? 'selected' : '' ?>>Agriculteur</option>
+                  <option value="admin" <?= $role === 'admin' ? 'selected' : '' ?>>Administrateur</option>
                 </select>
-                <span class="field-error" id="erreur-role"><?= e($errors['role'] ?? '') ?></span>
+                <span class="field-error" id="erreur-role"></span>
               </label>
+
               <label>Statut
-                <select id="statut" name="statut" class="<?= isset($errors['statut']) ? 'invalid' : '' ?>">
-                  <option value="actif" <?= $old['statut'] === 'actif' ? 'selected' : '' ?>>Actif</option>
-                  <option value="inactif" <?= $old['statut'] === 'inactif' ? 'selected' : '' ?>>Inactif</option>
+                <select id="statut" name="statut">
+                  <option value="actif" <?= $statut === 'actif' ? 'selected' : '' ?>>Actif</option>
+                  <option value="inactif" <?= $statut === 'inactif' ? 'selected' : '' ?>>Inactif</option>
                 </select>
-                <span class="field-error" id="erreur-statut"><?= e($errors['statut'] ?? '') ?></span>
+                <span class="field-error" id="erreur-statut"></span>
               </label>
+
               <div class="form-buttons">
                 <button type="submit">Ajouter</button>
                 <a class="button outline" href="users.php">Annuler</a>

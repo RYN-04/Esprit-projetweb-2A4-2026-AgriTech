@@ -36,6 +36,7 @@ $homeHref = $logoBase === '' ? '../index.php' : 'index.php';
       <?php if ($_SESSION['role'] === 'admin'): ?>
         <a href="<?= $logoBase ?>admin/dashboard.php">Administration</a>
       <?php endif; ?>
+      <a href="<?= $logoBase ?>profile.php" class="<?= navActive('profile', $currentPage) ?>">Mon profil</a>
       <span class="nav-user">Bonjour, <?= htmlspecialchars($_SESSION['prenom'], ENT_QUOTES, 'UTF-8') ?></span>
       <a href="<?= $logoBase ?>logout.php" class="nav-cta">Déconnexion</a>
     <?php else: ?>

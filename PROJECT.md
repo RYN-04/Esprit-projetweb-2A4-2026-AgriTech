@@ -88,13 +88,18 @@ Related rules:
 |---|:-:|:-:|:-:|
 | Sign up / log in | ✅ | — | — |
 | Use the 5 modules (own data) | ❌ | ✅ | ✅ |
-| Edit own profile / password | ❌ | ✅ | ✅ |
+| Edit own profile / change own password (`Views/profile.php`) | ❌ | ✅ | ✅ |
 | Access the Back Office (`Views/admin/`) | ❌ | ❌ | ✅ |
 | CRUD on all users, change roles, enable/disable accounts | ❌ | ❌ | ✅ |
 | Manage reference data (equipment categories, drones, energy categories…) | ❌ | ❌ | ✅ |
 | Moderate forum (delete any post/comment) | ❌ | ❌ | ✅ |
 
 > An admin must not be able to delete, demote or disable themselves, and the last admin cannot be removed.
+
+Final rules (D3):
+- Admin pages (`Views/admin/*`) check `$_SESSION['role'] === 'admin'` server-side and redirect everyone else to the login page. Admin links are also hidden from farmers in the navbar.
+- A farmer can only change their own `nom`, `prenom`, `email` and password. The role and status are never editable from the profile page.
+- An admin cannot remove their own admin role, and the last admin cannot be demoted (`UserController::countAdmins()`, checked in `edit.php`).
 
 ## 7. Tech stack
 

@@ -103,4 +103,26 @@ class UserController
         $query = $db->prepare($sql);
         $query->execute(['id' => $id]);
     }
+
+    // Change a user's password (hashed here, never stored in plain text)
+    public function updatePassword(int $id, string $newPassword): void
+    {
+        $sql = 'UPDATE User SET password = :password WHERE id_user = :id';
+        $db = config::getConnexion();
+        $query = $db->prepare($sql);
+        $query->execute([
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+            'id'       => $id,
+        ]);
+    }
+
+    // Number of administrators (used to protect the last admin)
+    public function countAdmins(): int
+    {
+        $sql = "SELECT COUNT(*) FROM User WHERE role = 'admin'";
+        $db = config::getConnexion();
+        $query = $db->prepare($sql);
+        $query->execute();
+        return (int) $query->fetchColumn();
+    }
 }

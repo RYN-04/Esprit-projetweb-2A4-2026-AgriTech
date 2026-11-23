@@ -1,69 +1,63 @@
-// AgriTech — admin_users : controles de saisie simples (cote navigateur).
-// Le PHP refait les memes verifications (obligatoire).
+// Controles de saisie des formulaires add.php et edit.php.
+// Si une erreur est trouvee, le formulaire n'est PAS envoye.
 
-// Affiche un message d'erreur sous un champ
+// Affiche un message sous le champ (ex: id = "nom" -> <span id="erreur-nom">)
 function afficherErreur(id, message) {
   document.getElementById('erreur-' + id).textContent = message;
-  document.getElementById(id).classList.add('invalid');
 }
 
-// Efface l'erreur d'un champ
-function effacerErreur(id) {
-  var span = document.getElementById('erreur-' + id);
-  var champ = document.getElementById(id);
-  if (span) { span.textContent = ''; }
-  if (champ) { champ.classList.remove('invalid'); }
-}
-
-// Appelee au submit des formulaires add.php et edit.php : onsubmit="return validerFormulaire()"
+// Appelee quand on clique sur "Ajouter" / "Enregistrer"
 function validerFormulaire() {
   var ok = true;
-  var ids = ['nom', 'prenom', 'email', 'password', 'role', 'statut'];
-  for (var i = 0; i < ids.length; i++) {
-    effacerErreur(ids[i]);
+
+  // On efface d'abord les anciens messages
+  afficherErreur('nom', '');
+  afficherErreur('prenom', '');
+  afficherErreur('email', '');
+  afficherErreur('role', '');
+  afficherErreur('statut', '');
+
+  // Nom
+  var nom = document.getElementById('nom').value.trim();
+  if (nom === '') {
+    afficherErreur('nom', 'Le nom est obligatoire.');
+    ok = false;
+  } else if (nom.length < 2) {
+    afficherErreur('nom', 'Le nom doit contenir au moins 2 caractères.');
+    ok = false;
   }
 
-  // nom et prenom
-  var noms = [['nom', 'Le nom'], ['prenom', 'Le prénom']];
-  for (var j = 0; j < noms.length; j++) {
-    var id = noms[j][0];
-    var label = noms[j][1];
-    var valeur = document.getElementById(id).value.trim();
-    if (valeur === '') {
-      afficherErreur(id, label + ' est obligatoire.');
-      ok = false;
-    } else if (valeur.length < 2) {
-      afficherErreur(id, label + ' doit contenir au moins 2 caractères.');
-      ok = false;
-    } else if (!/^[\p{L} '\-]+$/u.test(valeur)) {
-      afficherErreur(id, label + ' ne doit contenir que des lettres.');
-      ok = false;
-    }
+  // Prenom
+  var prenom = document.getElementById('prenom').value.trim();
+  if (prenom === '') {
+    afficherErreur('prenom', 'Le prénom est obligatoire.');
+    ok = false;
+  } else if (prenom.length < 2) {
+    afficherErreur('prenom', 'Le prénom doit contenir au moins 2 caractères.');
+    ok = false;
   }
 
-  // email
+  // Email : doit contenir @ et un point
   var email = document.getElementById('email').value.trim();
   if (email === '') {
     afficherErreur('email', "L'email est obligatoire.");
     ok = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    afficherErreur('email', 'Adresse email invalide.');
+  } else if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+    afficherErreur('email', 'Email invalide.');
     ok = false;
   }
 
-  // mot de passe (seulement dans add.php)
+  // Mot de passe : existe seulement dans add.php
   var champPassword = document.getElementById('password');
-  if (champPassword) {
-    if (champPassword.value === '') {
-      afficherErreur('password', 'Le mot de passe est obligatoire.');
-      ok = false;
-    } else if (champPassword.value.length < 8) {
+  if (champPassword !== null) {
+    afficherErreur('password', '');
+    if (champPassword.value.length < 8) {
       afficherErreur('password', 'Le mot de passe doit contenir au moins 8 caractères.');
       ok = false;
     }
   }
 
-  // role et statut
+  // Role et statut
   if (document.getElementById('role').value === '') {
     afficherErreur('role', 'Choisissez un rôle.');
     ok = false;
@@ -73,22 +67,10 @@ function validerFormulaire() {
     ok = false;
   }
 
-  return ok; // false = le formulaire n'est pas envoye
+  return ok; // true = on envoie, false = on bloque
 }
 
-// Appelee avant la suppression : onsubmit="return confirmerSuppression()"
+// Appelee avant la suppression
 function confirmerSuppression() {
   return confirm('Voulez-vous supprimer cet utilisateur ?');
 }
-
-// L'erreur d'un champ disparait quand on recommence a ecrire
-document.addEventListener('DOMContentLoaded', function () {
-  var ids = ['nom', 'prenom', 'email', 'password', 'role', 'statut'];
-  ids.forEach(function (id) {
-    var champ = document.getElementById(id);
-    if (champ) {
-      champ.addEventListener('input', function () { effacerErreur(id); });
-      champ.addEventListener('change', function () { effacerErreur(id); });
-    }
-  });
-});

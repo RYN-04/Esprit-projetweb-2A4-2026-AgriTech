@@ -92,6 +92,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur_role = 'Vous ne pouvez pas retirer votre propre rôle administrateur.';
         $ok = false;
     }
+    // Regle : on ne retire jamais le role du dernier administrateur
+    if ($user['role'] === 'admin' && $role !== 'admin' && $controller->countAdmins() <= 1) {
+        $erreur_role = 'Impossible : c\'est le dernier administrateur.';
+        $ok = false;
+    }
     if ($moi && $statut !== 'actif') {
         $erreur_statut = 'Vous ne pouvez pas désactiver votre propre compte.';
         $ok = false;

@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/session.php';
 
+// Seul l'admin a le droit d'etre ici
+if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../login.php');
+    exit;
+}
+
 $pageTitle = 'Tableau de bord - AgriTech';
 $currentPage = 'dashboard';
 ?>

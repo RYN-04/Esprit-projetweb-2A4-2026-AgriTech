@@ -34,6 +34,17 @@ class UserController
         return $query->fetchAll();
     }
 
+    // Search users by email (partial match, case-insensitive)
+    public function searchUsersByEmail(string $email): array
+    {
+        $sql = 'SELECT id_user, nom, prenom, email, role, statut FROM User
+                WHERE email LIKE :email ORDER BY nom, prenom';
+        $db = config::getConnexion();
+        $query = $db->prepare($sql);
+        $query->execute(['email' => '%' . addcslashes($email, '%_\\') . '%']);
+        return $query->fetchAll();
+    }
+
     // One user by id (returns null if not found)
     public function getUserById(int $id): ?array
     {

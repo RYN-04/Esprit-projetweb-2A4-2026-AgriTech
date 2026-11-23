@@ -15,7 +15,10 @@ $base = '../';   // cette page est dans un sous-dossier de admin/
 
 // On recupere tous les utilisateurs dans la base
 $controller = new UserController();
-$users = $controller->listUsers();
+$recherche = trim($_GET['q'] ?? '');
+$users = ($recherche !== '')
+    ? $controller->searchUsersByEmail($recherche)
+    : $controller->listUsers();
 
 // Message affiche apres une action (ajout, modification, suppression)
 $message = '';
@@ -69,6 +72,14 @@ function e($texte)
             <p class="alert error"><?= e($erreur) ?></p>
           <?php } ?>
 
+          <form method="get" action="users.php" class="search-form">
+            <input type="text" name="q" value="<?= e($recherche) ?>" placeholder="Rechercher par adresse email...">
+            <button type="submit" class="button">Rechercher</button>
+            <?php if ($recherche !== '') { ?>
+              <a href="users.php" class="reset">Réinitialiser</a>
+            <?php } ?>
+          </form>
+
           <div class="table-wrap">
             <table class="users">
               <tr>
@@ -95,6 +106,9 @@ function e($texte)
                     </div>
                   </td>
                 </tr>
+              <?php } ?>
+              <?php if (count($users) === 0) { ?>
+                <tr><td colspan="6">Aucun utilisateur trouvé.</td></tr>
               <?php } ?>
             </table>
           </div>

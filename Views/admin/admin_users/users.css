@@ -32,3 +32,8 @@ table.users tr:last-child td { border-bottom: 0; }
 .field-error:empty { display: none; }
 .form-buttons { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
 .form-buttons button, .form-buttons .button { width: auto; margin: 0; }
+
+.search-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0 16px; }
+.search-form input { flex: 1; min-width: 220px; max-width: 420px; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: .95rem; }
+.search-form .button { padding: 10px 20px; font-size: .95rem; border: 0; cursor: pointer; }
+.search-form .reset { color: #555; text-decoration: underline; }

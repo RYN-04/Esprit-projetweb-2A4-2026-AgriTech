@@ -15,5 +15,6 @@ if (ini_get('session.use_cookies')) {
 // 3. Destroy the session on the server
 session_destroy();
 
-header('Location: login.php?deconnecte=1');
+// ?expire=1 is sent by idle-timeout.js after 30 min without activity
+header('Location: ' . (isset($_GET['expire']) ? 'login.php?expire=1' : 'login.php?deconnecte=1'));
 exit;

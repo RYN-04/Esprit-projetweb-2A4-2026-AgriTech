@@ -82,6 +82,9 @@ function e(string $value): string
         <?php if (isset($_GET['deconnecte'])): ?>
           <p class="alert success">Vous êtes déconnecté.</p>
         <?php endif; ?>
+        <?php if (isset($_GET['expire'])): ?>
+          <p class="alert error">Session expirée après 30 minutes d'inactivité. Veuillez vous reconnecter.</p>
+        <?php endif; ?>
         <?php if (isset($errors['login'])): ?>
           <p class="alert error"><?= e($errors['login']) ?></p>
         <?php endif; ?>

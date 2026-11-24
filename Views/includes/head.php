@@ -10,3 +10,6 @@ $basePath = $basePath ?? '';
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="<?= $basePath ?>assets/css/style.css">
 <script src="<?= $basePath ?>assets/js/main.js" defer></script>
+<?php if (isset($_SESSION['id_user'])): ?>
+<script src="<?= $basePath ?>assets/js/idle-timeout.js" data-timeout="<?= defined('SESSION_TIMEOUT') ? SESSION_TIMEOUT : 1800 ?>" data-logout="<?= $basePath ?>logout.php?expire=1" data-ping="<?= $basePath ?>keepalive.php" defer></script>
+<?php endif; ?>

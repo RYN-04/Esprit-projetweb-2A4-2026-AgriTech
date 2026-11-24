@@ -8,3 +8,6 @@
 <link rel="stylesheet" href="<?= $base ?>../assets/css/style.css">
 <link rel="stylesheet" href="<?= $base ?>../assets/css/back.css">
 <link rel="stylesheet" href="<?= $base ?>../assets/css/admin.css">
+<?php if (isset($_SESSION['id_user'])): ?>
+<script src="<?= $base ?>../assets/js/idle-timeout.js" data-timeout="<?= defined('SESSION_TIMEOUT') ? SESSION_TIMEOUT : 1800 ?>" data-logout="<?= $base ?>../logout.php?expire=1" data-ping="<?= $base ?>../keepalive.php" defer></script>
+<?php endif; ?>
